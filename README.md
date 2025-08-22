@@ -38,6 +38,12 @@ ___
 ## Planned CLI spec
 
 ```bash
+## Init and config
+# Init the app with helpers to get the user to set path config and all
+mmsync init 
+mmsync set-repo-path
+mmsync get-repo-path
+
 ## CRUD directories to mmsync before staging
 mmsync add <target_path> -a <optional_alias>
 mmsync list
@@ -93,9 +99,9 @@ mmsync get-ignore
 mmsync set-ignore 0|1
 
 # Misc
-mmsync --version
-mmsync --help
-mmsync status # status
+mmsync version
+mmsync help
+mmsync status # status?
 mmsync status --verbose # status with verbose flag
 mmsync logs # gets runtime logs opened in user's $EDITOR
 ```
