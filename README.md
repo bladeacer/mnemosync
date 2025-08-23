@@ -5,12 +5,14 @@ A CLI tool that lets you add folders to backup periodically to a target Git repo
 The name is inspired by the Greek Goddess of memory Mnemosyne.
 
 ## Installation guide
+
 This installation guide assumes you know how to create and set up a Git repository.
 
 **Always backup your files before using mmsync**.
 
 ## Project status
-WIP
+WIP. See [this GitHub project](https://github.com/users/bladeacer/projects/3) for
+the progress tracker.
 
 ## Planned features
 - Check if required binaries are available before calling the tool
@@ -20,7 +22,6 @@ WIP
 ___
 - CRUD target directories which user wishes to backup e.g.
 
-
 - Rsync to mirror said target directories to a `~/.mnemosync/folders`
   - Either manually triggered or we integrate `cron`
 - Wrapper for user to manually copy the files and push them in their Git repository
@@ -28,12 +29,33 @@ ___
 - Wrapper to let user set default commit message format
 
 ## License
-GPLv3 
 
-<!--- Add FSF link here soon --->
+This CLI tool is licensed under GPLv3.
 
-___
-- Configuration file with schema
+### License Notice
+
+```
+This file is part of mnemosync.
+
+mnemosync is free software: you can redistribute it and/or modify it under the terms of the
+GNU General Public License as published by the Free Software Foundation, either
+version 3 of the License, or (at your option) any later version.
+
+mnemosync is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+PURPOSE. See the GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License along with mnemosync.
+If not, see <https://www.gnu.org/licenses/>. 
+```
+
+### License file
+
+You can find the [license file here](./LICENSE).
+
+## Credits
+
+This CLI was made possible by [Cobra CLI](https://github.com/spf13/cobra).
 
 ## Planned CLI spec
 

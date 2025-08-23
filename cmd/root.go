@@ -1,5 +1,5 @@
 /*
-Copyright © 2025 NAME HERE <EMAIL ADDRESS>
+Copyright © 2025 bladeacer <wg.nick.exe@gmail.com>
 
 */
 package cmd
