@@ -1,3 +1,6 @@
+![GitHub go.mod Go version](https://img.shields.io/github/go-mod/go-version/bladeacer/mnemosync?style=for-the-badge&logo=go)
+![GitHub License](https://img.shields.io/github/license/bladeacer/mnemosync?style=for-the-badge)
+
 # mnemosync
 
 A CLI tool that lets you add folders to backup manually to a target Git repository.
@@ -14,9 +17,18 @@ This installation guide assumes you know how to create and set up a Git reposito
 go install github.com/bladeacer/mnemosync
 ```
 
+Ensure that you can access Go binaries in your $PATH.
+
+```bash
+mmsync
+```
+
 ## Project status
 WIP. See [this GitHub project](https://github.com/users/bladeacer/projects/3) for
 the progress tracker.
+
+This is my first project using the Go programming language, but I hope it will
+be useful.
 
 ## Planned features
 - Check if required binaries are available before calling the tool
@@ -34,16 +46,20 @@ ___
 
 ## License
 
-This CLI tool is licensed under GPLv3.
+This Golang CLI app, "mnemosync" is released under the GNU General Public
+License version 3 (GPLv3) License.
 
 ### License Notice
 
 ```
-This file is part of mnemosync.
+This file is part of mnemosync. mnemosync is a CLI tool that lets you add
+folders to backup manually to a target Git repository. 
 
-mnemosync is free software: you can redistribute it and/or modify it under the terms of the
-GNU General Public License as published by the Free Software Foundation, either
-version 3 of the License, or (at your option) any later version.
+Copyright (c) 2025 bladeacer
+
+mnemosync is free software: you can redistribute it and/or modify it under the
+terms of the GNU General Public License as published by the Free Software
+Foundation, either version 3 of the License, or (at your option) any later version.
 
 mnemosync is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
 without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
@@ -62,6 +78,8 @@ You can find the [license file here](./LICENSE).
 This CLI was made possible by [Cobra CLI](https://github.com/spf13/cobra).
 
 ## Planned CLI spec
+
+TBC. View currently available options by running mnemosync without any flags or arguments.
 
 ```bash
 ## Init and config
@@ -133,5 +151,3 @@ mmsync status # status?
 mmsync status --verbose # status with verbose flag
 mmsync logs # gets runtime logs opened in user's $EDITOR
 ```
-
-Care about performance and async later.
