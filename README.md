@@ -1,6 +1,6 @@
 # mnemosync
 
-A CLI tool that lets you add folders to backup periodically to a target Git repository.
+A CLI tool that lets you add folders to backup manually to a target Git repository.
 
 The name is inspired by the Greek Goddess of memory Mnemosyne.
 
@@ -9,6 +9,10 @@ The name is inspired by the Greek Goddess of memory Mnemosyne.
 This installation guide assumes you know how to create and set up a Git repository.
 
 **Always backup your files before using mmsync**.
+
+```bash
+go install github.com/bladeacer/mnemosync
+```
 
 ## Project status
 WIP. See [this GitHub project](https://github.com/users/bladeacer/projects/3) for
@@ -63,6 +67,8 @@ This CLI was made possible by [Cobra CLI](https://github.com/spf13/cobra).
 ## Init and config
 # Init the app with helpers to get the user to set path config and all
 mmsync init 
+mmsync get-config-path
+mmsync set-config-path
 mmsync set-repo-path
 mmsync get-repo-path
 

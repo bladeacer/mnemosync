@@ -6,6 +6,7 @@ package main
 
 import (
 	"mmsync/cmd"
+	"mmsync/config"
 	"fmt"
 	"os"
 )
@@ -19,5 +20,11 @@ func main() {
 		os.Exit(1) // Exit with an error code
 	}
 
-	cmd.Execute()
+	// Load the configuration file, falling back to defaults if it doesn't exist.
+	appConfig, err := config.LoadConfig()
+	if err != nil {
+		fmt.Printf("Error loading configuration: %v", err)
+	}
+
+	cmd.Execute(appConfig)
 }

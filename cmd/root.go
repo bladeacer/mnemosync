@@ -1,23 +1,22 @@
 /*
 Copyright © 2025 bladeacer <wg.nick.exe@gmail.com>
-
 */
 package cmd
 
 import (
+	"mmsync/config"
 	"os"
-
 	"github.com/spf13/cobra"
 )
 
-
+var appConf *config.MnemoConf 
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "mmsync",
-	Short: "A CLI tool that lets you add folders to backup periodically to a target Git repository.",
+	Short: "A CLI tool that lets you add folders to backup manually to a target Git repository.",
 
-	Long: `mnemosync is a CLI tool that lets you add folders to backup periodically to a target Git repository.
+	Long: `mnemosync is a CLI tool that lets you add folders to backup manually to a target Git repository.
 The name is inspired by the Greek Goddess of memory Mnemosyne.
 
 This application assumes that you know how to create and set up a Git repository.`,
@@ -28,7 +27,8 @@ This application assumes that you know how to create and set up a Git repository
 
 // Execute adds all child commands to the root command and sets flags appropriately.
 // This is called by main.main(). It only needs to happen once to the rootCmd.
-func Execute() {
+func Execute(cfg *config.MnemoConf) {
+	appConf = cfg
 	err := rootCmd.Execute()
 	if err != nil {
 		os.Exit(1)

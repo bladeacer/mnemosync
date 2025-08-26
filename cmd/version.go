@@ -6,7 +6,7 @@ package cmd
 
 import (
 	"fmt"
-
+	// "mmsync/config"
 	"github.com/spf13/cobra"
 )
 
@@ -18,7 +18,9 @@ var versionCmd = &cobra.Command{
 Code is currently very WIP.
 Improve this text in the long run.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("mnemosync Version: 0.0.1")
+		schema_ver := appConf.ConfigSchema.AppVersion
+		app_ver := schema_ver + "\n"
+		fmt.Printf("mnemosync %s", app_ver)
 	},
 }
 
