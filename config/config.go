@@ -1,3 +1,7 @@
+/*
+Copyright © 2025 bladeacer <wg.nick.exe@gmail.com>
+*/
+
 package config
 
 import (
@@ -10,6 +14,7 @@ type ConfigSchema struct {
 	ConfigPath string `yaml:"config_path"`
 	AppVersion string `yaml:"app_version"`
 	IsInit bool `yaml:"is_init"`
+	RepoPath string `yaml:"repo_path"`
 }
 type MnemoConf struct {
 	ConfigSchema ConfigSchema `yaml:"config_schema"`
@@ -21,6 +26,7 @@ func GetMnemoConf() *MnemoConf {
 			ConfigPath: ResolveConfigPath(),
 			AppVersion: "Version 0.0.1",
 			IsInit: false,
+			RepoPath: "",
 		},
 	}
 }

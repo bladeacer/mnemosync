@@ -1,3 +1,7 @@
+/*
+Copyright © 2025 bladeacer <wg.nick.exe@gmail.com>
+*/
+
 package cmd
 
 import (

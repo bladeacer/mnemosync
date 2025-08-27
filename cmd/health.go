@@ -1,3 +1,7 @@
+/*
+Copyright © 2025 bladeacer <wg.nick.exe@gmail.com>
+*/
+
 package cmd
 
 import (
@@ -23,6 +27,7 @@ Also checks if the mnemosync configuration files have been created.`,
 		
 		// The configPath from appConf will be the resolved path.
 		configPath := appConf.ConfigSchema.ConfigPath
+		repoPath := appConf.ConfigSchema.RepoPath
 		
 		fmt.Println("\n\tRunning Health Check")
 		fmt.Printf("\t%s\n\n", repeatedSeparator)
@@ -37,13 +42,16 @@ Also checks if the mnemosync configuration files have been created.`,
 		// Check for the existence of the specific config file.
 		if _, err := os.Stat(configPath); os.IsNotExist(err) {
 			// File does not exist, so print a warning and exit cleanly.
-			fmt.Printf("\tConfiguration file not found at: %s\n", configPath)
-			fmt.Printf("\n\t%s\n", repeatedSeparator)
-			fmt.Printf("\n\tConfiguration file not found. Run 'mmsync init' to start.")
+			fmt.Printf("\tConfiguration file not found at:\n\t%s\n\tRun 'mmsync init' to start.", configPath)
 			fmt.Printf("\n\t%s\n", repeatedSeparator)
 		} else {
 			// File exists, so print that it's found.
 			fmt.Printf("\tConfiguration file exists:\n\t%s\n", configPath)
+			fmt.Printf("\n\t%s\n", repeatedSeparator)
+		}
+
+		if repoPath == "" {
+			fmt.Printf("\n\tRepository Path is not defined.\n\tRun 'mmsync init' to start.")
 			fmt.Printf("\n\t%s\n", repeatedSeparator)
 		}
 

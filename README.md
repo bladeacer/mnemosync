@@ -85,10 +85,9 @@ TBC. View currently available options by running mnemosync without any flags or 
 ## Init and config
 # Init the app with helpers to get the user to set path config and all
 mmsync init 
-mmsync get-config-path
-mmsync set-config-path
-mmsync set-repo-path
-mmsync get-repo-path
+mmsync config
+mmsync config --open
+mmsync repo get
 
 ## CRUD directories to mmsync before staging
 mmsync add <target_path> -a <optional_alias>
@@ -101,10 +100,6 @@ mmsync search <query-by-path-or-alias>
 
 ## Add warning for user to confirm if they wish to delete all directories they added
 mmsync clear
-
-## Location of mmsync related files, defaults to ~/.config/.mmsync/
-mmsync locate
-mmsync set-location <custom_path>
 
 # Backup related
 ## Technical info: staging is just a temp directory over at ~/.config/.mmsync/staging.

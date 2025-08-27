@@ -1,15 +1,18 @@
 /*
 Copyright © 2025 bladeacer <wg.nick.exe@gmail.com>
 */
+
 package cmd
 
 import (
 	"mmsync/config"
 	"os"
 	"github.com/spf13/cobra"
+	"fmt"
 )
 
 var appConf *config.MnemoConf 
+var versionFlag bool
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
@@ -22,7 +25,16 @@ The name is inspired by the Greek Goddess of memory Mnemosyne.
 This application assumes that you know how to create and set up a Git repository.`,
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
-	// Run: func(cmd *cobra.Command, args []string) { },
+	Run: func(cmd *cobra.Command, args []string) { 
+		if versionFlag {
+			schema_ver := appConf.ConfigSchema.AppVersion
+			fmt.Printf("mnemosync %s\n", schema_ver)
+			return
+		}
+		// Your original root command logic goes here
+		// e.g., print help or run default action
+		cmd.Help()
+	},
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
@@ -44,7 +56,8 @@ func init() {
 
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.
-	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	// rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	rootCmd.Flags().BoolVarP(&versionFlag, "version", "v", false, "Gets the version of mnemosync running")
 }
 
 
