@@ -21,6 +21,17 @@ var initCmd = &cobra.Command{
 		// Use the ResolveConfigPath helper to get the path.
 		configPath := config.ResolveConfigPath()
 
+		// TODO: Add asking user input until valid for repo path with validation (need to check if target path has a .git directory). Assume the user has set up the repo at that path, else the command would abort.
+
+		if _, err := os.Stat(configPath); err == nil {
+			fmt.Fprintf(os.Stderr, "Error: Configuration file already exists at %s\n", configPath)
+			os.Exit(1)
+		} else if !os.IsNotExist(err) {
+			// This handles other potential errors like permission issues.
+			fmt.Fprintf(os.Stderr, "Error checking for config file at %s: %v\n", configPath, err)
+			os.Exit(1)
+		}
+
 		// Get the default configuration.
 		defaultConfig := config.GetMnemoConf()
 		defaultConfig.ConfigSchema.IsInit = true
