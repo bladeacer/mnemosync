@@ -45,7 +45,6 @@ func ResolveConfigPath() string {
 	return filepath.Join(homeDir, ".config/mmsync", "config.yaml")
 }
 
-
 func LoadConfig() (*MnemoConf, error) {
 	configPath := ResolveConfigPath()
 	
@@ -64,4 +63,15 @@ func LoadConfig() (*MnemoConf, error) {
 	}
 
 	return cfg, nil
+}
+
+func DirExists(path string) (bool, error) {
+	info, err := os.Stat(filepath.Join(path, ".git"))
+	if err == nil {
+		return info.IsDir(), nil // Path exists and is a directory
+	}
+	if os.IsNotExist(err) {
+		return false, nil // Path does not exist
+	}
+	return false, err // Some other error occurred
 }

@@ -27,6 +27,9 @@ Does not persist it to a file.`,
 	},
 }
 
+// TODO: Persist the generated man page to local man-db once it is called,
+// add a flag to force persisting to local man-db
+
 func displayManPage() {
 	manPage, err := mcobra.NewManPage(1, rootCmd)
 	if err != nil {

@@ -11,6 +11,8 @@ import (
 	"mmsync/config"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v3"
+	"bufio"
+	"strings"
 )
 
 // initCmd is the command for creating a default config file.
@@ -20,8 +22,6 @@ var initCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		// Use the ResolveConfigPath helper to get the path.
 		configPath := config.ResolveConfigPath()
-
-		// TODO: Add asking user input until valid for repo path with validation (need to check if target path has a .git directory). Assume the user has set up the repo at that path, else the command would abort.
 
 		if _, err := os.Stat(configPath); err == nil {
 			fmt.Fprintf(os.Stderr, "Error: Configuration file already exists at %s\n", configPath)
@@ -34,34 +34,101 @@ var initCmd = &cobra.Command{
 
 		// Get the default configuration.
 		defaultConfig := config.GetMnemoConf()
+		repoPath := get_repo_path()
 		defaultConfig.ConfigSchema.IsInit = true
+		defaultConfig.ConfigSchema.RepoPath = repoPath
 
-		// Marshal the default config into bytes.
-		data, err := yaml.Marshal(defaultConfig)
-		if err != nil {
-			fmt.Fprintln(os.Stderr, "Error creating default config:", err)
-			return
+		exists, err := config.DirExists(repoPath)
+		if exists {
+			fmt.Printf("\nDirectory '%s/.git' exists.\n", repoPath)
+			write_yaml(defaultConfig, configPath)
+		} else if err != nil {
+			fmt.Printf("\nDirectory '%s/.git' does not exist.\n", repoPath)
+			fmt.Printf("Aborting write\n")
 		}
 
-		// Check if the directory exists, and create it if not.
-		dir := filepath.Dir(configPath)
-		if _, err := os.Stat(dir); os.IsNotExist(err) {
-			if err := os.MkdirAll(dir, 0755); err != nil {
-				fmt.Fprintln(os.Stderr, "Error creating config directory:", err)
-				return
-			}
-		}
-
-		// Write the default config to the determined path.
-		if err := os.WriteFile(configPath, data, 0644); err != nil {
-			fmt.Fprintln(os.Stderr, "Error writing config file:", err)
-			return
-		}
-		
-		fmt.Printf("Initialized default configuration file at %s\n", configPath)
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(initCmd)
+}
+
+func get_repo_path() string {
+	reader := bufio.NewReader(os.Stdin)
+	inputPathBuf := ""
+	fmt.Println("Ensure that the target repository path is correct and does not contain other important files.")
+	for {
+		fmt.Println("Enter a valid absolute path to the target repository to archive files to: ")
+		inputPath, err := reader.ReadString('\n')
+		if err != nil {
+			fmt.Println("Error reading input:", err)
+			continue
+		}
+
+		inputPath = strings.TrimSpace(inputPath)
+
+		// Validate if the path exists and is a directory
+		info, err := os.Stat(inputPath)
+		if os.IsNotExist(err) {
+			fmt.Printf("Error: Directory '%s' does not exist.\n", inputPath)
+			continue
+		} else if err != nil {
+			fmt.Println("Error checking path:", err)
+			continue
+		}
+
+		if !info.IsDir() {
+			fmt.Printf("Error: '%s' is not a directory.\n", inputPath)
+			continue
+		}
+
+		// Get the absolute path for consistency
+		absPath, err := filepath.Abs(inputPath)
+		if err != nil {
+			fmt.Println("Error getting absolute path:", err)
+			continue
+		}
+
+		fmt.Printf("You entered the directory: %s\n", absPath)
+		inputPathBuf = inputPath
+		break
+	}
+
+	exists, err := config.DirExists(inputPathBuf)
+	if exists {
+		return inputPathBuf
+	} else if err != nil {
+		fmt.Printf("Directory '%s/.git' does not exist.\n", inputPathBuf)
+		fmt.Printf("Aborting write\n")
+		return ""
+	} else {
+		return ""
+	}
+}
+
+func write_yaml (defaultConfig *config.MnemoConf, configPath string) {
+	// Marshal the default config into bytes.
+	data, err := yaml.Marshal(defaultConfig)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "Error creating default config:", err)
+		return
+	}
+
+	// Check if the directory exists, and create it if not.
+	dir := filepath.Dir(configPath)
+	if _, err := os.Stat(dir); os.IsNotExist(err) {
+		if err := os.MkdirAll(dir, 0755); err != nil {
+			fmt.Fprintln(os.Stderr, "Error creating config directory:", err)
+			return
+		}
+	}
+
+	// Write the default config to the determined path.
+	if err := os.WriteFile(configPath, data, 0644); err != nil {
+		fmt.Fprintln(os.Stderr, "Error writing config file:", err)
+		return
+	}
+
+	fmt.Printf("Initialized default configuration file at %s\n", configPath)
 }
