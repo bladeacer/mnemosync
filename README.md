@@ -86,10 +86,12 @@ TBC. View currently available options by running mnemosync without any flags or 
 # Init the app with helpers to get the user to set path config and all
 mmsync init 
 mmsync config
-mmsync config --open
+mmsync config open
+# Prints to stdout
 mmsync repo get
 
 ## CRUD directories to mmsync before staging
+# Save this in the local viewable db somehow each time the binary is called.
 mmsync add <target_path> -a <optional_alias>
 mmsync list
 mmsync change <target_path-or-alias> <new-target_path-or-alias>
@@ -102,22 +104,42 @@ mmsync search <query-by-path-or-alias>
 mmsync clear
 
 # Backup related
-## Technical info: staging is just a temp directory over at ~/.config/.mmsync/staging.
-## Inherits from the mmsync path setting
+## Technical info: staging is just rsyncing over to the target repo
 ## You can use . to include all directories and aliases
 
-# rsyncs all added target mmsync directories or aliases to staging 
+# rsyncs all added target mmsync directories or aliases to staging, and then
+# calls git add in the target repo
 mmsync stage <target_path-or-alias> 
-# rsyncs unstages added target mmsync directories or aliases to staging 
-mmsync unstage <target_path-or-alias> 
-mmsync get-staging # get status of staging
 
-mmsync get-hist # get staging history
-## get staging history limit in days before it is cleared. Defaults to 7 days and a max of 1024 MB
+# rsyncs unstages added target mmsync directories or aliases to staging 
+# git restore --staged <target_path-or-alias> in the target repo
+# somehow map aliases to directory names
+mmsync unstage <target_path-or-alias> 
+
+# get status of staging
+# git status in the target repo
+mmsync status
+
+# get staging history 
+# git log --oneline target repo
+mmsync log
+
+## get staging history limit in days before it is cleared. Defaults to 7 days
+## and a max of 1024 MB. Limitation only enforced when the binary is called
+
+## Need to read last modified time of each rsync mirrored directory or save its
+## last modified time each time an operation is done on it.
+## with confirmation message
+
 mmsync get-hist-limit 
 mmsync set-hist-limit -d <number_of_days> -s <max_size_in_mb>
+
+# calls git restore --staged . and git restore . in the target repo
+# with confirmation message
 mmsync clear-hist # clears staging history
 
+# set archive options
+# write this option in the config file somehow
 mmsync set-archiver tar|zip
 mmsync get-archiver # gets archive tool used, defaults to tar
 
@@ -127,22 +149,22 @@ mmsync get-archiver # gets archive tool used, defaults to tar
 mmsync get-commit-fmt # Defaults to mnemosync archive ISO timestamp
 mmsync set-commit-fmt <custom_format>
 
-## checks if anything in staging, if yes it compresses writes the archive file over to be pushed
-## if not, warns the user that staging is empty
-## When pushing, write folder and filenames affected to viewable local db as part of staging history
+## checks if anything in staging, if yes it compresses writes the archive file
+## over to be pushed
+## if not, warns the user that staging is empty or files are not staged yet
+## When pushing, write folder and filenames affected to viewable local db as
+## part of staging history
 ## Also does the needed git commit and push on behalf of the user.
 mmsync push 
 
 ## Respecting .gitignore
-## mmsync respects gitignore in the directories you provide by default
+## mmsync respects gitignore in the target repo when adding directories or aliases
 ## Returns true or 1 by default
+## When setting to 0, warning + confirmation
 mmsync get-ignore 
 mmsync set-ignore 0|1
 
 # Misc
 mmsync version
 mmsync help
-mmsync status # status?
-mmsync status --verbose # status with verbose flag
-mmsync logs # gets runtime logs opened in user's $EDITOR
 ```

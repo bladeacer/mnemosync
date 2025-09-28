@@ -15,24 +15,20 @@ import (
 	"strings"
 )
 
-// initCmd is the command for creating a default config file.
 var initCmd = &cobra.Command{
 	Use:   "init",
 	Short: "Initializes a new configuration file with default values.",
 	Run: func(cmd *cobra.Command, args []string) {
-		// Use the ResolveConfigPath helper to get the path.
 		configPath := config.ResolveConfigPath()
 
 		if _, err := os.Stat(configPath); err == nil {
 			fmt.Fprintf(os.Stderr, "Error: Configuration file already exists at %s\n", configPath)
 			os.Exit(1)
 		} else if !os.IsNotExist(err) {
-			// This handles other potential errors like permission issues.
 			fmt.Fprintf(os.Stderr, "Error checking for config file at %s: %v\n", configPath, err)
 			os.Exit(1)
 		}
 
-		// Get the default configuration.
 		defaultConfig := config.GetMnemoConf()
 		repoPath := get_repo_path()
 		defaultConfig.ConfigSchema.IsInit = true
@@ -68,7 +64,6 @@ func get_repo_path() string {
 
 		inputPath = strings.TrimSpace(inputPath)
 
-		// Validate if the path exists and is a directory
 		info, err := os.Stat(inputPath)
 		if os.IsNotExist(err) {
 			fmt.Printf("Error: Directory '%s' does not exist.\n", inputPath)
@@ -83,7 +78,6 @@ func get_repo_path() string {
 			continue
 		}
 
-		// Get the absolute path for consistency
 		absPath, err := filepath.Abs(inputPath)
 		if err != nil {
 			fmt.Println("Error getting absolute path:", err)
@@ -108,14 +102,12 @@ func get_repo_path() string {
 }
 
 func write_yaml (defaultConfig *config.MnemoConf, configPath string) {
-	// Marshal the default config into bytes.
 	data, err := yaml.Marshal(defaultConfig)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "Error creating default config:", err)
 		return
 	}
 
-	// Check if the directory exists, and create it if not.
 	dir := filepath.Dir(configPath)
 	if _, err := os.Stat(dir); os.IsNotExist(err) {
 		if err := os.MkdirAll(dir, 0755); err != nil {
@@ -124,7 +116,6 @@ func write_yaml (defaultConfig *config.MnemoConf, configPath string) {
 		}
 	}
 
-	// Write the default config to the determined path.
 	if err := os.WriteFile(configPath, data, 0644); err != nil {
 		fmt.Fprintln(os.Stderr, "Error writing config file:", err)
 		return

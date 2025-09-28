@@ -12,7 +12,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// configCmd represents the config command
 var configCmd = &cobra.Command{
 	Use:   "config",
 	Short: "Manage the mnemosync configuration file",
@@ -29,7 +28,30 @@ var configCmd = &cobra.Command{
 	},
 }
 
-// openCmd represents the open subcommand
+var getCmd = &cobra.Command{
+	Use:   "get",
+	Short: "Prints the current configuration to stdout",
+	Long:  "Prints the content of the mnemosync configuration file to the standard output. If the file doesn't exist, it prints a message.",
+	Run: func(cmd *cobra.Command, args []string) {
+		configPath := config.ResolveConfigPath()
+		isInit := appConf.ConfigSchema.IsInit
+
+		if !isInit {
+			fmt.Printf("Error: Configuration file not found at expected path:\n%s\nRun mmsync init to start.\n", configPath)
+			os.Exit(1)
+		}
+
+		// Read and print the config file contents
+		content, err := os.ReadFile(configPath)
+		if err != nil {
+			fmt.Printf("Error: failed to read config file at %s: %v\n", configPath, err)
+			os.Exit(1)
+		}
+
+		fmt.Printf("%s", content)
+	},
+}
+
 var openCmd = &cobra.Command{
 	Use:   "open",
 	Short: "Opens the configuration file with the user's $EDITOR",
@@ -43,13 +65,11 @@ var openCmd = &cobra.Command{
 			os.Exit(1)
 		}
 		
-		// Check if the config file exists before trying to open it
 		if !isInit {
 			fmt.Printf("\nConfiguration file not found at expected path\n%s\nRun mmsync init to start.\n", configPath)
 			os.Exit(1)
 		}
 
-		// Open the file with the user's editor
 		editorCmd := exec.Command(editor, configPath)
 		editorCmd.Stdin = os.Stdin
 		editorCmd.Stdout = os.Stdout
@@ -65,6 +85,6 @@ var openCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(configCmd)
-	// Add the open subcommand to the config command
+	configCmd.AddCommand(getCmd)
 	configCmd.AddCommand(openCmd)
 }
