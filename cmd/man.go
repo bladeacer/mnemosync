@@ -17,8 +17,8 @@ import (
 // manCmd represents the man command
 var manCmd = &cobra.Command{
 	Use: "man",
-	Short: "Gets the generated manual page for mnemosync",
-	Long: `Gets the generated manual page for mnemosync
+	Short: "Generates the manual page for mnemosync",
+	Long: `Generates and displays manual page for mnemosync
 
 Does not persist it to a file.`,
 	Run: func(cmd *cobra.Command, args []string) {

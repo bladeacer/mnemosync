@@ -9,7 +9,6 @@ import (
 	"os"
 	"os/exec"
 	"strings"
-
 	"github.com/spf13/cobra"
 )
 
@@ -59,19 +58,38 @@ Also checks if the mnemosync configuration files have been created.`,
 	},
 }
 
-// Renamed helper functions to follow Go conventions
 func checkBinWrapper(binaryName string, isOptional bool) {
 	path, err := exec.LookPath(binaryName)
-	if err != nil && !isOptional {
-		fmt.Printf("\tWarning: Binary '%s' not found or not executable in PATH:\n\t\t%v\n", binaryName, err)
+
+	if err != nil {
+		if !isOptional {
+			fmt.Printf("\t[FAIL] Required Binary '%s' not found in PATH.\n", binaryName)
+		} else {
+			fmt.Printf("\t[WARN] Optional Binary '%s' not found in PATH.\n", binaryName)
+		}
 		return
 	}
-	if err != nil && isOptional {
-		fmt.Printf("\tWarning: Optional Binary '%s' not found or not executable in PATH:\n\t\t%v\n", binaryName, err)
+
+	fmt.Printf("\t[PASS] Binary '%s' found at: %s\n", binaryName, path)
+
+	cmd := exec.Command(binaryName, "--version")
+	output, versionErr := cmd.CombinedOutput()
+
+	if versionErr != nil {
+		// Log a specific message if the command failed, even if the binary was found
+		if exitError, ok := versionErr.(*exec.ExitError); ok {
+			fmt.Printf("\t\t[WARN] Version check failed (Exit Code %d). Output:\n\t\t%s", exitError.ExitCode(), strings.TrimSpace(string(output)))
+		} else {
+			fmt.Printf("\t\t[WARN] Version check failed to execute: %v\n", versionErr)
+		}
 		return
 	}
-	fmt.Printf("\tBinary '%s' found at: %s\n", binaryName, path)
+
+	// Print the version output, trimmed for cleaner output
+	versionLine := strings.SplitN(string(output), "\n", 2)[0]
+	fmt.Printf("\t\tVersion: %s\n", strings.TrimSpace(versionLine))
 }
+
 
 func init() {
 	rootCmd.AddCommand(healthCmd)
