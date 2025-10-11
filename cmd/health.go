@@ -27,6 +27,7 @@ Also checks if the mnemosync configuration files have been created.`,
 		// The configPath from appConf will be the resolved path.
 		configPath := appConf.ConfigSchema.ConfigPath
 		repoPath := appConf.ConfigSchema.RepoPath
+		dbPath := appConf.ConfigSchema.DbPath
 		
 		fmt.Println("\n\tRunning Health Check")
 		fmt.Printf("\t%s\n\n", repeatedSeparator)
@@ -52,7 +53,18 @@ Also checks if the mnemosync configuration files have been created.`,
 		if repoPath == "" {
 			fmt.Printf("\n\tRepository Path is not defined.\n\tRun 'mmsync init' to start.")
 			fmt.Printf("\n\t%s\n", repeatedSeparator)
+		} else {
+			fmt.Printf("\tRepository exists:\n\t%s\n", repoPath)
+			fmt.Printf("\n\t%s\n", repeatedSeparator)
 		}
+		if dbPath == "" {
+			fmt.Printf("\n\tDatabase Path is not defined.\n\tRun 'mmsync init' to start.")
+			fmt.Printf("\n\t%s\n", repeatedSeparator)
+		} else {
+			fmt.Printf("\n\tDatabase exists:\n\t%s\n", dbPath)
+			fmt.Printf("\n\t%s\n", repeatedSeparator)
+		}
+
 
 		fmt.Println("\n\tHealth Check Complete")
 	},

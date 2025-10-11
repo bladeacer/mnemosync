@@ -1,107 +1,144 @@
-/*
-Copyright © 2025 bladeacer <wg.nick.exe@gmail.com>
-*/
-
 package cmd
 
 import (
+	"bufio"
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
+
 	"mmsync/config"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v3"
-	"bufio"
-	"strings"
 )
+
+// Global variable to hold the path passed via flag
+var repoPathFlag string
 
 var initCmd = &cobra.Command{
 	Use:   "init",
 	Short: "Initializes a new configuration file with default values.",
 	Run: func(cmd *cobra.Command, args []string) {
 		configPath := config.ResolveConfigPath()
+		dbPath := config.ResolveDbPath()
+		_, confErr := os.Stat(configPath)
+		_, dbErr := os.Stat(dbPath)
 
-		if _, err := os.Stat(configPath); err == nil {
-			fmt.Fprintf(os.Stderr, "Error: Configuration file already exists at %s\n", configPath)
+		if confErr == nil || dbErr == nil {
+			fmt.Fprintf(os.Stderr, "Error: Cannot run init. The following files already exist:\n")
+			if confErr == nil {
+				fmt.Fprintf(os.Stderr, "- Configuration file at %s\n", configPath)
+			}
+			if dbErr == nil {
+				fmt.Fprintf(os.Stderr, "- Database file at %s\n", dbPath)
+			}
+			fmt.Fprintf(os.Stderr, "Please remove the existing files before running 'init'.\n")
 			os.Exit(1)
-		} else if !os.IsNotExist(err) {
-			fmt.Fprintf(os.Stderr, "Error checking for config file at %s: %v\n", configPath, err)
+		} else {
+			if !os.IsNotExist(confErr) {
+				fmt.Fprintf(os.Stderr, "Error checking for config file at %s: %v\n", configPath, confErr)
+			}
+			if !os.IsNotExist(dbErr) {
+				fmt.Fprintf(os.Stderr, "Error checking for database file at %s: %v\n", dbPath, dbErr)
+			}
+		}
+
+		var finalRepoPath string
+		var err error
+
+		if repoPathFlag != "" {
+			finalRepoPath, err = processRepoPath(repoPathFlag)
+		} else {
+			finalRepoPath, err = getRepoPathInteractive()
+		}
+
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "\nInitialization aborted: %v\n", err)
 			os.Exit(1)
 		}
 
 		defaultConfig := config.GetMnemoConf()
-		repoPath := get_repo_path()
 		defaultConfig.ConfigSchema.IsInit = true
-		defaultConfig.ConfigSchema.RepoPath = repoPath
+		defaultConfig.ConfigSchema.RepoPath = finalRepoPath
 
-		exists, err := config.DirExists(repoPath)
+		exists, _ := config.GitDirExists(finalRepoPath)
+		
 		if exists {
-			fmt.Printf("\nDirectory '%s/.git' exists.\n", repoPath)
-			write_yaml(defaultConfig, configPath)
-		} else if err != nil {
-			fmt.Printf("\nDirectory '%s/.git' does not exist.\n", repoPath)
-			fmt.Printf("Aborting write\n")
+			fmt.Printf("\nRepository path validated: '%s/.git' exists.\n", finalRepoPath)
+			writeYAML(defaultConfig, configPath)
+			config.GetDataStore().SaveData(dbPath) 
+			fmt.Printf("\nDatabase created at: '%s'.\n", dbPath)
+		} else {
+			fmt.Printf("\nDirectory '%s/.git' does not exist.\n", finalRepoPath)
+			fmt.Printf("Aborting configuration write.\n")
 		}
-
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(initCmd)
+	initCmd.Flags().StringVarP(&repoPathFlag, "repo-path", "r", "", "Specify the path to the target Git repository.")
 }
 
-func get_repo_path() string {
+func processRepoPath(inputPath string) (string, error) {
+	if strings.HasPrefix(inputPath, "~/") {
+		homeDir, err := os.UserHomeDir()
+		if err != nil {
+			return "", fmt.Errorf("failed to get home directory: %w", err)
+		}
+		inputPath = filepath.Join(homeDir, inputPath[2:])
+	}
+
+	absPath, err := filepath.Abs(inputPath)
+	if err != nil {
+		return "", fmt.Errorf("failed to resolve absolute path for '%s': %w", inputPath, err)
+	}
+
+	info, err := os.Stat(absPath)
+	if os.IsNotExist(err) {
+		return "", fmt.Errorf("directory '%s' does not exist", absPath)
+	} else if err != nil {
+		return "", fmt.Errorf("error checking path '%s': %w", absPath, err)
+	}
+
+	if !info.IsDir() {
+		return "", fmt.Errorf("'%s' is not a directory", absPath)
+	}
+
+	return absPath, nil
+}
+
+
+func getRepoPathInteractive() (string, error) {
 	reader := bufio.NewReader(os.Stdin)
-	inputPathBuf := ""
-	fmt.Println("Ensure that the target repository path is correct and does not contain other important files.")
+	fmt.Println("Ensure that the target repository path is correct and does not contain other important files.\nDatabase for storing directories and their aliases would use the same parent directory.")
+	
 	for {
-		fmt.Println("Enter a valid absolute path to the target repository to archive files to: ")
+		fmt.Println("Enter a valid path to the target repository to archive files to (e.g., /path/to/repo or ~/myrepo): ")
+		
 		inputPath, err := reader.ReadString('\n')
 		if err != nil {
-			fmt.Println("Error reading input:", err)
+			fmt.Fprintln(os.Stderr, "Error reading input:", err)
 			continue
 		}
-
+		
 		inputPath = strings.TrimSpace(inputPath)
-
-		info, err := os.Stat(inputPath)
-		if os.IsNotExist(err) {
-			fmt.Printf("Error: Directory '%s' does not exist.\n", inputPath)
-			continue
-		} else if err != nil {
-			fmt.Println("Error checking path:", err)
+		if inputPath == "" {
 			continue
 		}
 
-		if !info.IsDir() {
-			fmt.Printf("Error: '%s' is not a directory.\n", inputPath)
-			continue
-		}
-
-		absPath, err := filepath.Abs(inputPath)
+		finalRepoPath, err := processRepoPath(inputPath)
 		if err != nil {
-			fmt.Println("Error getting absolute path:", err)
+			fmt.Fprintf(os.Stderr, "Error: %v\n", err)
 			continue
 		}
-
-		fmt.Printf("You entered the directory: %s\n", absPath)
-		inputPathBuf = inputPath
-		break
-	}
-
-	exists, err := config.DirExists(inputPathBuf)
-	if exists {
-		return inputPathBuf
-	} else if err != nil {
-		fmt.Printf("Directory '%s/.git' does not exist.\n", inputPathBuf)
-		fmt.Printf("Aborting write\n")
-		return ""
-	} else {
-		return ""
+		
+		fmt.Printf("Path accepted: %s\n", finalRepoPath)
+		return finalRepoPath, nil
 	}
 }
 
-func write_yaml (defaultConfig *config.MnemoConf, configPath string) {
+func writeYAML(defaultConfig *config.MnemoConf, configPath string) {
 	data, err := yaml.Marshal(defaultConfig)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "Error creating default config:", err)

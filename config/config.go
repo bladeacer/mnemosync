@@ -15,7 +15,9 @@ type ConfigSchema struct {
 	AppVersion string `yaml:"app_version"`
 	IsInit bool `yaml:"is_init"`
 	RepoPath string `yaml:"repo_path"`
+	DbPath string `yaml:"db_path"`
 }
+
 type MnemoConf struct {
 	ConfigSchema ConfigSchema `yaml:"config_schema"`
 }
@@ -27,6 +29,7 @@ func GetMnemoConf() *MnemoConf {
 			AppVersion: "Version 0.0.1",
 			IsInit: false,
 			RepoPath: "",
+			DbPath: ResolveDbPath(),
 		},
 	}
 }
@@ -43,6 +46,20 @@ func ResolveConfigPath() string {
 	}
 
 	return filepath.Join(homeDir, ".config/mmsync", "config.yaml")
+}
+
+func ResolveDbPath() string {
+	homeDir, err := os.UserHomeDir()
+
+	if err != nil {
+		return ".config/mmsync/mmsync-state.json" 
+	}
+
+	if envPath := os.Getenv("MMSYNC_CONF"); envPath != "" {
+		return filepath.Join(homeDir, envPath)
+	}
+
+	return filepath.Join(homeDir, ".config/mmsync", "mmsync-state.json")
 }
 
 func LoadConfig() (*MnemoConf, error) {
@@ -65,13 +82,13 @@ func LoadConfig() (*MnemoConf, error) {
 	return cfg, nil
 }
 
-func DirExists(path string) (bool, error) {
+func GitDirExists(path string) (bool, error) {
 	info, err := os.Stat(filepath.Join(path, ".git"))
 	if err == nil {
-		return info.IsDir(), nil // Path exists and is a directory
+		return info.IsDir(), nil
 	}
 	if os.IsNotExist(err) {
-		return false, nil // Path does not exist
+		return false, nil
 	}
-	return false, err // Some other error occurred
+	return false, err
 }

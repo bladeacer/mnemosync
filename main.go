@@ -20,11 +20,14 @@ func main() {
 		os.Exit(1) // Exit with an error code
 	}
 
-	// Load the configuration file, falling back to defaults if it doesn't exist.
 	appConfig, err := config.LoadConfig()
+	dataStore, err2 := config.LoadDataStore()
 	if err != nil {
 		fmt.Printf("Error loading configuration: %v", err)
 	}
+	if err2 != nil {
+		fmt.Printf("Error loading database: %v", err)
+	}
 
-	cmd.Execute(appConfig)
+	cmd.Execute(appConfig, dataStore)
 }
