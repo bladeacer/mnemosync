@@ -96,15 +96,14 @@ func resolveAndValidatePath(path string) (string, error) {
 }
 
 func addDirectoryEntry(targetPath string, alias string) error {
-	for _, entry := range dataStore.TrackedDirs {
-		newID := int(dataStore.CurrentId)
+	for newID, entry := range dataStore.TrackedDirs {
 		if entry.TargetPath == targetPath {
-		    return fmt.Errorf("path '%s' is already being tracked (ID: %d, Alias: %s)", 
+		    return fmt.Errorf("path '%s' is already being tracked (ID: %s, Alias: %s)", 
 			targetPath, newID, entry.Alias)
 		}
 
 		if entry.Alias == alias {
-		    return fmt.Errorf("alias '%s' is already in use by path '%s' (ID: %d)", 
+		    return fmt.Errorf("alias '%s' is already in use by path '%s' (ID: %s)", 
 			alias, entry.TargetPath, newID)
 		}
 	}

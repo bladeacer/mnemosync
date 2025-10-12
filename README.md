@@ -81,6 +81,8 @@ This CLI was made possible by [Cobra CLI](https://github.com/spf13/cobra).
 
 TBC. View currently available options by running mnemosync without any flags or arguments.
 
+There is also `mmsync man` for a generated manual page.
+
 ```bash
 ## Init and config
 # Init the app with helpers to get the user to set path config and all
