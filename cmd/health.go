@@ -21,85 +21,109 @@ Checks if the required system binaries are installed
 
 Also checks if the mnemosync configuration files have been created.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		separator := "_"
-		repeatedSeparator := strings.Repeat(separator, 72)
-		
-		// The configPath from appConf will be the resolved path.
-		configPath := appConf.ConfigSchema.ConfigPath
-		repoPath := appConf.ConfigSchema.RepoPath
-		dbPath := appConf.ConfigSchema.DbPath
-		
-		fmt.Println("\n\tRunning Health Check")
-		fmt.Printf("\t%s\n\n", repeatedSeparator)
-
-		checkBinWrapper("git", false)
-		checkBinWrapper("rsync", false)
-		checkBinWrapper("tar", false)
-		checkBinWrapper("zip", true)
-
-		fmt.Printf("\t%s\n\n", repeatedSeparator)
-
-		// Check for the existence of the specific config file.
-		if _, err := os.Stat(configPath); os.IsNotExist(err) {
-			// File does not exist, so print a warning and exit cleanly.
-			fmt.Printf("\tConfiguration file not found at:\n\t%s\n\tRun 'mmsync init' to start.", configPath)
-			fmt.Printf("\n\t%s\n", repeatedSeparator)
-		} else {
-			// File exists, so print that it's found.
-			fmt.Printf("\tConfiguration file exists:\n\t%s\n", configPath)
-			fmt.Printf("\n\t%s\n", repeatedSeparator)
-		}
-
-		if repoPath == "" {
-			fmt.Printf("\n\tRepository Path is not defined.\n\tRun 'mmsync init' to start.")
-			fmt.Printf("\n\t%s\n", repeatedSeparator)
-		} else {
-			fmt.Printf("\tRepository exists:\n\t%s\n", repoPath)
-			fmt.Printf("\n\t%s\n", repeatedSeparator)
-		}
-		if dbPath == "" {
-			fmt.Printf("\n\tDatabase Path is not defined.\n\tRun 'mmsync init' to start.")
-			fmt.Printf("\n\t%s\n", repeatedSeparator)
-		} else {
-			fmt.Printf("\n\tDatabase exists:\n\t%s\n", dbPath)
-			fmt.Printf("\n\t%s\n", repeatedSeparator)
-		}
-
-
-		fmt.Println("\n\tHealth Check Complete")
+		RunHealthCheck(true)
 	},
 }
 
-func checkBinWrapper(binaryName string, isOptional bool) {
+func RunHealthCheck(shouldPrintOutput bool) string {
+	var errStrBuilder strings.Builder
+	separator := "_"
+	repeatedSeparator := strings.Repeat(separator, 72)
+	
+	configPath := appConf.ConfigSchema.ConfigPath
+	repoPath := appConf.ConfigSchema.RepoPath
+	dbPath := appConf.ConfigSchema.DbPath
+	
+	fmt.Println("\n\tRunning Health Check")
+
+	if err := checkBinWrapper("git", false); err != "" { errStrBuilder.WriteString(err) }
+	if err := checkBinWrapper("rsync", false); err != "" { errStrBuilder.WriteString(err) }
+	if err := checkBinWrapper("tar", false); err != "" { errStrBuilder.WriteString(err) }
+	if err := checkBinWrapper("zip", true); err != "" { errStrBuilder.WriteString(err) }
+
+	fmt.Printf("\t%s\n\n", repeatedSeparator)
+
+	fmt.Println("\tConfiguration File:")
+	if _, err := os.Stat(configPath); os.IsNotExist(err) {
+		msg := fmt.Sprintf("\t\t[NOT FOUND] Configuration file not found at:\n\t\t%s\n\t\tRun 'mmsync init' to start.\n", configPath)
+		errStrBuilder.WriteString(msg)
+		fmt.Print(msg)
+	} else {
+		fmt.Printf("\t\t[FOUND] at %s\n", configPath)
+	}
+	fmt.Printf("\t%s\n", repeatedSeparator)
+	
+	fmt.Println("\tRepository Path:")
+	if repoPath == "" {
+		msg := "\t\t[NOT SET] Repository Path is not defined.\n\t\tRun 'mmsync init' to set.\n"
+		errStrBuilder.WriteString(msg)
+		fmt.Print(msg)
+	} else {
+		fmt.Printf("\t\t[SET] %s\n", repoPath)
+        
+		if _, err := os.Stat(repoPath); os.IsNotExist(err) {
+		     msg := fmt.Sprintf("\t\t[WARNING] Repository directory does not exist on disk: %s\n", repoPath)
+		     errStrBuilder.WriteString(msg) 
+		     fmt.Print(msg)
+		}
+	}
+	fmt.Printf("\t%s\n", repeatedSeparator)
+
+	fmt.Println("\tDatabase Path:")
+	if dbPath == "" {
+		msg := "\t\t[NOT SET] Database Path is not defined.\n\t\tRun 'mmsync init' to start.\n"
+		errStrBuilder.WriteString(msg)
+		fmt.Print(msg)
+	} else {
+		fmt.Printf("\t\t[SET] %s\n", dbPath)
+	}
+    
+	if _, err := os.Stat(dbPath); os.IsNotExist(err) {
+		msg := fmt.Sprintf("\t\t[WARNING] Database file not found on disk: %s\n", dbPath)
+		errStrBuilder.WriteString(msg)
+		fmt.Print(msg)
+	}
+
+	fmt.Printf("\t%s\n", repeatedSeparator)
+	fmt.Println("\n\tHealth Check Complete")
+    
+	return errStrBuilder.String()
+}
+
+
+func checkBinWrapper(binaryName string, isOptional bool) string {
+	var msgBuilder strings.Builder
+
 	path, err := exec.LookPath(binaryName)
 
 	if err != nil {
 		if !isOptional {
-			fmt.Printf("\t[FAIL] Required Binary '%s' not found in PATH.\n", binaryName)
-		} else {
-			fmt.Printf("\t[WARN] Optional Binary '%s' not found in PATH.\n", binaryName)
+			return fmt.Sprintf("[FAIL] Required Binary '%s' not found in PATH.", binaryName)
 		}
-		return
+		return fmt.Sprintf("[WARNING] Optional Binary '%s' not found in PATH.", binaryName)
 	}
 
-	fmt.Printf("\t[PASS] Binary '%s' found at: %s\n", binaryName, path)
+	msgBuilder.WriteString(fmt.Sprintf("[PASS] Binary '%s' found at: %s\n", binaryName, path))
 
 	cmd := exec.Command(binaryName, "--version")
 	output, versionErr := cmd.CombinedOutput()
 
 	if versionErr != nil {
-		// Log a specific message if the command failed, even if the binary was found
+		msgBuilder.WriteString(fmt.Sprintf("\t[WARNING] Version check failed for '%s'. ", binaryName))
+		
 		if exitError, ok := versionErr.(*exec.ExitError); ok {
-			fmt.Printf("\t\t[WARN] Version check failed (Exit Code %d). Output:\n\t\t%s", exitError.ExitCode(), strings.TrimSpace(string(output)))
+			msgBuilder.WriteString(fmt.Sprintf("Exit Code %d. Output:\n\t\t%s\n", exitError.ExitCode(), strings.TrimSpace(string(output))))
 		} else {
-			fmt.Printf("\t\t[WARN] Version check failed to execute: %v\n", versionErr)
+			msgBuilder.WriteString(fmt.Sprintf("Failed to execute: %v\n", versionErr))
 		}
-		return
+		
+		return msgBuilder.String()
 	}
 
-	// Print the version output, trimmed for cleaner output
 	versionLine := strings.SplitN(string(output), "\n", 2)[0]
-	fmt.Printf("\t\tVersion: %s\n", strings.TrimSpace(versionLine))
+	msgBuilder.WriteString(fmt.Sprintf("\tVersion: %s\n", strings.TrimSpace(versionLine)))
+    
+	return msgBuilder.String()
 }
 
 

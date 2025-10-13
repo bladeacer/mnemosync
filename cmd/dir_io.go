@@ -15,7 +15,6 @@ import (
 )
 
 var aliases []string
-
 var addCmd = &cobra.Command{
 	Use:   "add [path_1] [path_2]...",
 	Short: "Add one or more target paths to be tracked for backup",
@@ -31,33 +30,45 @@ mmsync add ./ ~/test_dir --alias="test","test_dir_w_alias"
 Adds the current directory recursively to be staged.`,
 	Args: cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		if len(aliases) > 0 && len(aliases) != len(args) {
-			fmt.Fprintf(os.Stderr, "Error: Number of paths (%d) must match number of aliases (%d).\n", len(args), len(aliases))
+		configPath := config.ResolveConfigPath()
+		isInit := appConf.ConfigSchema.IsInit
+
+		if !isInit {
+			fmt.Printf("\nConfiguration file not found at expected path\n%s\nRun mmsync init to start.\n", configPath)
+		} else {
+			addWrapper(args)
+			fmt.Println("\nFinished adding entries.")
+		}
+
+
+	},
+}
+
+func addWrapper(args[] string) {
+	if len(aliases) > 0 && len(aliases) != len(args) {
+		fmt.Fprintf(os.Stderr, "Error: Number of paths (%d) must match number of aliases (%d).\n", len(args), len(aliases))
+		os.Exit(1)
+	}
+
+	for i, argPath := range args {
+		resolvedPath, err := resolveAndValidatePath(argPath)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Error processing path '%s': %v\n", argPath, err)
 			os.Exit(1)
 		}
 
-		for i, argPath := range args {
-			resolvedPath, err := resolveAndValidatePath(argPath)
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "Error processing path '%s': %v\n", argPath, err)
-				os.Exit(1)
-			}
-
-			var alias string
-			if len(aliases) > i {
-				alias = aliases[i]
-			} else {
-				alias = filepath.Base(resolvedPath)
-			}
-			err = addDirectoryEntry(resolvedPath, alias)
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "Fatal Error adding path '%s': %v\n", argPath, err)
-				os.Exit(1)
-			}
+		var alias string
+		if len(aliases) > i {
+			alias = aliases[i]
+		} else {
+			alias = filepath.Base(resolvedPath)
 		}
-
-		fmt.Println("\nFinished adding entries.")
-	},
+		err = addDirectoryEntry(resolvedPath, alias)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Fatal Error adding path '%s': %v\n", argPath, err)
+			os.Exit(1)
+		}
+	}
 }
 
 func resolveAndValidatePath(path string) (string, error) {

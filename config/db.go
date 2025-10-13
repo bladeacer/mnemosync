@@ -28,22 +28,38 @@ func GetDataStore() *DataStore {
 }
 func LoadDataStore() (*DataStore, error) {
 	dbPath := ResolveDbPath()
-	ds := GetDataStore()
+	
+	defaultDS := GetDataStore()
 
 	data, err := os.ReadFile(dbPath)
 	if err != nil {
 		if os.IsNotExist(err) {
-			return ds, nil
+			return defaultDS, nil
 		}
 		return nil, fmt.Errorf("error reading database file %s: %w", dbPath, err)
 	}
-	
-	if err := json.Unmarshal(data, ds); err != nil {
-		return nil, fmt.Errorf("error unmarshalling JSON data from %s: %w", dbPath, err)
+
+	tempDS := GetDataStore()
+
+	if err := json.Unmarshal(data, tempDS); err != nil {
+		return nil, fmt.Errorf("error unmarshalling JSON data from %s. File may be corrupt: %w", dbPath, err)
 	}
 
-	return ds, nil
+	if err := validateDataStoreSchema(tempDS); err != nil {
+		fmt.Fprintf(os.Stderr, "Warning: Database at %s failed schema validation: %v. Overwriting with default data.\n", dbPath, err)
+		
+		tempDS = defaultDS
+		
+		if saveErr := tempDS.SaveData(dbPath); saveErr != nil {
+		    return nil, fmt.Errorf("critical error: failed to repair and save default data store: %w", saveErr)
+		}
+		
+		return tempDS, nil
+	}
+	
+	return tempDS, nil
 }
+
 func (ds *DataStore) AddDir(data DirData) string {
     ds.CurrentId += 1
     
@@ -66,3 +82,37 @@ func (ds *DataStore) SaveData(targetPath string) error {
 	}
 	return nil
 }
+
+func validateDataStoreSchema(ds *DataStore) error {
+	if ds.CurrentId < 0 {
+		return fmt.Errorf("current_id cannot be negative; found: %d", ds.CurrentId)
+	} 
+	if ds.TrackedDirs == nil {
+		return fmt.Errorf("required field 'tracked_dirs' is missing from the database schema")
+	}
+
+	seenTargetPaths := make(map[string]struct{})
+	seenAliases := make(map[string]struct{})
+
+	for id, data := range ds.TrackedDirs {
+		if data.TargetPath == "" {
+			return fmt.Errorf("entry with ID '%s' is missing a required target_path", id)
+		}
+		if data.Alias == "" {
+			return fmt.Errorf("entry with ID '%s' is missing a required alias", id)
+		}
+
+		if _, exists := seenTargetPaths[data.TargetPath]; exists {
+			return fmt.Errorf("duplicate target_path found: '%s'", data.TargetPath)
+		}
+		seenTargetPaths[data.TargetPath] = struct{}{}
+
+		if _, exists := seenAliases[data.Alias]; exists {
+			return fmt.Errorf("duplicate alias found: '%s'", data.Alias)
+		}
+		seenAliases[data.Alias] = struct{}{}
+	}
+
+	return nil
+}
+

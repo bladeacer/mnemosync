@@ -20,10 +20,10 @@ var configCmd = &cobra.Command{
 		configPath := config.ResolveConfigPath()
 		isInit := appConf.ConfigSchema.IsInit
 
-		// Default behavior (original get-config-path functionality)
-		fmt.Printf("\nConfiguration file path:\n%s\n", configPath)
 		if !isInit {
 			fmt.Printf("\nConfiguration file not found at expected path\n%s\nRun mmsync init to start.\n", configPath)
+		} else {
+			fmt.Printf("\nConfiguration file path:\n%s\n", configPath)
 		}
 	},
 }
