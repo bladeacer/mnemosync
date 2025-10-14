@@ -15,7 +15,7 @@ import (
 var configCmd = &cobra.Command{
 	Use:   "config",
 	Short: "Manage the mnemosync configuration file",
-	Long:  "Provides commands to manage the application's configuration file.",
+	Long:  "Provides commands to manage the application's configuration file.\nSet the configuration path either with $MMSYNC_CONF environment variable in your shell configuration file e.g. bashrc or with mmsync init.\nConfiguration directory should only be under your home directory.\nRestart your shell when changing or clearing the environment variable.",
 	Run: func(cmd *cobra.Command, args []string) {
 		configPath := config.ResolveConfigPath()
 		isInit := appConf.ConfigSchema.IsInit

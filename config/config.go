@@ -6,6 +6,7 @@ package config
 
 import (
 	"os"
+	"io"
 	"path/filepath"
 	"gopkg.in/yaml.v3"
 	"fmt"
@@ -35,37 +36,133 @@ func GetMnemoConf() *MnemoConf {
 	}
 }
 
+const (
+    DefaultConfigDir = ".config/mmsync"
+    DefaultConfigFile = "config.yaml"
+    DefaultDbFile = "mmsync-state.json"
+)
+
 func ResolveConfigPath() string {
 	homeDir, err := os.UserHomeDir()
-
 	if err != nil {
-		return ".config/mmsync/config.yaml" 
+		return filepath.Join(DefaultConfigDir, DefaultConfigFile)
 	}
 
 	if envPath := os.Getenv("MMSYNC_CONF"); envPath != "" {
-		return filepath.Join(homeDir, envPath)
+		resolvedPath := envPath
+		
+		if !filepath.IsAbs(envPath) {
+			resolvedPath = filepath.Join(homeDir, envPath)
+		}
+
+		if filepath.Base(resolvedPath) != DefaultConfigFile {
+			resolvedPath = filepath.Join(resolvedPath, DefaultConfigFile)
+		}
+		
+		return resolvedPath
 	}
 
-	return filepath.Join(homeDir, ".config/mmsync", "config.yaml")
+	return filepath.Join(homeDir, DefaultConfigDir, DefaultConfigFile)
 }
 
 func ResolveDbPath() string {
 	homeDir, err := os.UserHomeDir()
-
 	if err != nil {
-		return ".config/mmsync/mmsync-state.json" 
+		return filepath.Join(DefaultConfigDir, DefaultDbFile)
 	}
 
 	if envPath := os.Getenv("MMSYNC_CONF"); envPath != "" {
-		return filepath.Join(homeDir, envPath)
+		configPath := ResolveConfigPath()
+		
+		configDir := filepath.Dir(configPath)
+		return filepath.Join(configDir, DefaultDbFile)
 	}
 
-	return filepath.Join(homeDir, ".config/mmsync", "mmsync-state.json")
+	return filepath.Join(homeDir, DefaultConfigDir, DefaultDbFile)
+}
+
+func copyFile(src, dst string) error {
+	sourceFile, err := os.Open(src)
+	if err != nil {
+		return fmt.Errorf("failed to open source file %s: %w", src, err)
+	}
+	defer sourceFile.Close()
+
+	if err := os.MkdirAll(filepath.Dir(dst), 0755); err != nil {
+		return fmt.Errorf("failed to create destination directory for %s: %w", dst, err)
+	}
+
+	destFile, err := os.Create(dst)
+	if err != nil {
+		return fmt.Errorf("failed to create destination file %s: %w", dst, err)
+	}
+	defer destFile.Close()
+
+	if _, err := io.Copy(destFile, sourceFile); err != nil {
+		return fmt.Errorf("failed to copy content from %s to %s: %w", src, dst, err)
+	}
+
+	if err := destFile.Sync(); err != nil {
+		return fmt.Errorf("failed to sync destination file: %w", err)
+	}
+
+	return nil
+}
+
+// Copies configuration and database files when new MMSYNC_CONF set
+func migrateConfigData(newConfigPath string) error {
+	homeDir, err := os.UserHomeDir()
+	if err != nil {
+		return nil
+	}
+
+	oldConfigDir := filepath.Join(homeDir, DefaultConfigDir)
+	oldConfigFile := filepath.Join(oldConfigDir, DefaultConfigFile)
+	oldDbFile := filepath.Join(oldConfigDir, DefaultDbFile)
+	
+	newConfigDir := filepath.Dir(newConfigPath)
+	newDbFile := filepath.Join(newConfigDir, DefaultDbFile)
+
+	if os.Getenv("MMSYNC_CONF") != "" && oldConfigDir != newConfigDir {
+
+		if _, err := os.Stat(oldConfigFile); os.IsNotExist(err) {
+			return nil
+		} else if err != nil {
+			return fmt.Errorf("error checking old configuration file %s: %w", oldConfigFile, err)
+		}
+
+		if _, err := os.Stat(newConfigPath); err == nil {
+			return fmt.Errorf("cannot migrate: new configuration file already exists at %s", newConfigPath)
+		}
+
+		fmt.Fprintf(os.Stderr, "Migrating configuration files from %s to %s...\n", oldConfigDir, newConfigDir)
+		
+		if err := copyFile(oldConfigFile, newConfigPath); err != nil {
+			return fmt.Errorf("failed to copy configuration file: %w", err)
+		}
+		
+		if _, err := os.Stat(oldDbFile); err == nil {
+			if err := copyFile(oldDbFile, newDbFile); err != nil {
+				fmt.Fprintf(os.Stderr, "Warning: Failed to copy database file: %v\n", err)
+			}
+		}
+
+		if err := os.RemoveAll(oldConfigDir); err != nil {
+			fmt.Fprintf(os.Stderr, "Warning: Failed to clean up old configuration directory %s: %v\n", oldConfigDir, err)
+		}
+		
+		fmt.Fprintf(os.Stderr, "Configuration migration complete.\n")
+	}
+
+	return nil
 }
 
 func LoadConfig() (*MnemoConf, error) {
 	configPath := ResolveConfigPath()
 	
+	if err := migrateConfigData(configPath); err != nil {
+        	return nil, fmt.Errorf("Configuration migration failed: %w", err)
+    	}
 	defaultCfg := GetMnemoConf()
 
 	data, err := os.ReadFile(configPath)
