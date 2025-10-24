@@ -14,7 +14,7 @@ import (
 )
 
 /*
-Copyright © 2025 bladeacer <wg.nick.exe@gmail.com>
+Copyright (C) 2025 bladeacer <wg.nick.exe@gmail.com>
 */
 
 // Global variable to hold the path passed via flag

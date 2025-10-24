@@ -8,7 +8,7 @@ import (
 	"fmt"
 )
 /*
-Copyright © 2025 bladeacer <wg.nick.exe@gmail.com>
+Copyright (C) 2025 bladeacer <wg.nick.exe@gmail.com>
 */
 
 type ConfigSchema struct {

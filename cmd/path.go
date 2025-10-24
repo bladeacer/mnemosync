@@ -8,7 +8,7 @@ import (
 	"github.com/spf13/cobra"
 )
 /*
-Copyright © 2025 bladeacer <wg.nick.exe@gmail.com>
+Copyright (C) 2025 bladeacer <wg.nick.exe@gmail.com>
 */
 
 
