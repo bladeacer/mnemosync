@@ -1,5 +1,6 @@
 ![GitHub go.mod Go version](https://img.shields.io/github/go-mod/go-version/bladeacer/mnemosync?style=for-the-badge&logo=go)
 ![GitHub License](https://img.shields.io/github/license/bladeacer/mnemosync?style=for-the-badge)
+[![Go Report Card](https://goreportcard.com/badge/github.com/bladeacer/mmsync)](https://goreportcard.com/report/github.com/bladeacer/mmsync)
 
 # mmsync
 

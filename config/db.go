@@ -1,7 +1,3 @@
-/*
-Copyright © 2025 bladeacer <wg.nick.exe@gmail.com>
-*/
-
 package config
 
 import (
@@ -11,6 +7,9 @@ import (
 	"path/filepath"
 	"strconv"
 )
+/*
+Copyright © 2025 bladeacer <wg.nick.exe@gmail.com>
+*/
 
 type DirData struct {
 	TargetPath string `json:"target_path"`

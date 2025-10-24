@@ -1,8 +1,3 @@
-/*
-Copyright © 2025 bladeacer wg.nick.exe@gmail.com
-*/
-// TODO: This command helps add directory paths to be staged before performing backup. Have CRUD in this.
-// Somehow rsync directories to the target directory and then tar archive all of them when push is called
 package cmd
 
 import (
@@ -13,6 +8,11 @@ import (
 	"github.com/bladeacer/mmsync/config" 
 	"github.com/spf13/cobra"
 )
+/*
+Copyright © 2025 bladeacer wg.nick.exe@gmail.com
+*/
+// TODO: This command helps add directory paths to be staged before performing backup. Have CRUD in this.
+// Somehow rsync directories to the target directory and then tar archive all of them when push is called
 
 var aliases []string
 var addCmd = &cobra.Command{

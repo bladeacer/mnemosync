@@ -1,7 +1,3 @@
-/*
-Copyright © 2025 bladeacer <wg.nick.exe@gmail.com>
-*/
-
 package cmd
 
 import (
@@ -16,6 +12,10 @@ import (
 	"gopkg.in/yaml.v3"
 	"github.com/peterh/liner"
 )
+
+/*
+Copyright © 2025 bladeacer <wg.nick.exe@gmail.com>
+*/
 
 // Global variable to hold the path passed via flag
 var repoPathFlag string

@@ -1,7 +1,3 @@
-/*
-Copyright © 2025 bladeacer <wg.nick.exe@gmail.com>
-*/
-
 package cmd
 
 import (
@@ -13,6 +9,10 @@ import (
 	"github.com/muesli/roff"
 	"github.com/spf13/cobra"
 )
+/*
+Copyright © 2025 bladeacer <wg.nick.exe@gmail.com>
+*/
+
 
 // manCmd represents the man command
 var manCmd = &cobra.Command{
@@ -63,23 +63,33 @@ func displayManPage() {
 	manCmd.Stdout = os.Stdout
 	manCmd.Stderr = os.Stderr
 
-	if err := manCmd.Run(); err != nil {
-		// If `man` isn't found, try a simpler approach.
-		// Fallback: pipe directly to `nroff` or `less`
-		fmt.Fprintf(os.Stderr, "Error running 'man' command, falling back to 'nroff'.\n")
-		
-		// Use `nroff` to process the roff content.
-		nroffCmd := exec.Command("nroff", "-man")
-		nroffCmd.Stdin = &buf
-		nroffCmd.Stdout = os.Stdout
-		nroffCmd.Stderr = os.Stderr
-
-		if err := nroffCmd.Run(); err != nil {
-			// Final fallback: just dump the raw text.
-			fmt.Fprintf(os.Stderr, "Error running 'nroff', displaying raw content.\n")
-			fmt.Println(manContent)
-		}
+	if err := manCmd.Run(); err == nil {
+		return
 	}
+
+	fmt.Fprintf(os.Stderr, "Error running 'man' command, falling back to 'nroff'.\n")
+
+	nroffCmd := exec.Command("nroff", "-man")
+	nroffCmd.Stdin = &buf
+	nroffCmd.Stdout = os.Stdout
+	nroffCmd.Stderr = os.Stderr
+
+	if err := nroffCmd.Run(); err == nil {
+		return
+	}
+
+	fmt.Fprintf(os.Stderr, "Error running 'nroff', falling back to pager (%s).\n", pager)
+
+	pagerCmd := exec.Command(pager)
+	pagerCmd.Stdin = &buf
+	pagerCmd.Stdout = os.Stdout
+	pagerCmd.Stderr = os.Stderr
+
+	if err := pagerCmd.Run(); err == nil {
+		return
+	}
+	fmt.Fprintf(os.Stderr, "Error running pager (%s), displaying raw content.\n", pager)
+	fmt.Println(manContent)
 }
 
 func init() {

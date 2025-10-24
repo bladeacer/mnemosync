@@ -1,7 +1,3 @@
-/*
-Copyright © 2025 bladeacer <wg.nick.exe@gmail.com>
-*/
-
 package config
 
 import (
@@ -11,6 +7,9 @@ import (
 	"gopkg.in/yaml.v3"
 	"fmt"
 )
+/*
+Copyright © 2025 bladeacer <wg.nick.exe@gmail.com>
+*/
 
 type ConfigSchema struct {
 	ConfigPath string `yaml:"config_path"`

@@ -1,7 +1,3 @@
-/*
-Copyright © 2025 bladeacer <wg.nick.exe@gmail.com>
-*/
-
 package main
 
 import (
@@ -10,6 +6,9 @@ import (
 	"fmt"
 	"os"
 )
+/*
+Copyright © 2025 bladeacer <wg.nick.exe@gmail.com>
+*/
 
 func main() {
 	euid := os.Geteuid()

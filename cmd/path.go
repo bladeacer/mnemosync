@@ -1,7 +1,3 @@
-/*
-Copyright © 2025 bladeacer <wg.nick.exe@gmail.com>
-*/
-
 package cmd
 
 import (
@@ -11,6 +7,10 @@ import (
 	"os/exec"
 	"github.com/spf13/cobra"
 )
+/*
+Copyright © 2025 bladeacer <wg.nick.exe@gmail.com>
+*/
+
 
 var configCmd = &cobra.Command{
 	Use:   "config",

@@ -1,7 +1,3 @@
-/*
-Copyright © 2025 bladeacer <wg.nick.exe@gmail.com>
-*/
-
 package cmd
 
 import (
@@ -10,6 +6,9 @@ import (
 	"github.com/spf13/cobra"
 	"fmt"
 )
+/*
+Copyright © 2025 bladeacer <wg.nick.exe@gmail.com>
+*/
 
 var dataStore *config.DataStore
 var appConf *config.MnemoConf 

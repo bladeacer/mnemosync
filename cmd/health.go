@@ -1,7 +1,3 @@
-/*
-Copyright © 2025 bladeacer <wg.nick.exe@gmail.com>
-*/
-
 package cmd
 
 import (
@@ -11,6 +7,9 @@ import (
 	"strings"
 	"github.com/spf13/cobra"
 )
+/*
+Copyright © 2025 bladeacer <wg.nick.exe@gmail.com>
+*/
 
 // healthCmd represents the health command
 var healthCmd = &cobra.Command{
