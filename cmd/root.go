@@ -5,7 +5,7 @@ Copyright © 2025 bladeacer <wg.nick.exe@gmail.com>
 package cmd
 
 import (
-	"mmsync/config"
+	"github.com/bladeacer/mmsync/config"
 	"os"
 	"github.com/spf13/cobra"
 	"fmt"

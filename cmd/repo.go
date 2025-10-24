@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
-	"mmsync/config"
+	"github.com/bladeacer/mmsync/config"
 	"github.com/spf13/cobra"
 )
 

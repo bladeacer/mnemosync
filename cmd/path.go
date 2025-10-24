@@ -6,7 +6,7 @@ package cmd
 
 import (
 	"fmt"
-	"mmsync/config"
+	"github.com/bladeacer/mmsync/config"
 	"os"
 	"os/exec"
 	"github.com/spf13/cobra"

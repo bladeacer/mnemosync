@@ -5,8 +5,8 @@ Copyright © 2025 bladeacer <wg.nick.exe@gmail.com>
 package main
 
 import (
-	"mmsync/cmd"
-	"mmsync/config"
+	"github.com/bladeacer/mmsync/cmd"
+	"github.com/bladeacer/mmsync/config"
 	"fmt"
 	"os"
 )

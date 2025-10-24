@@ -1,9 +1,10 @@
 ![GitHub go.mod Go version](https://img.shields.io/github/go-mod/go-version/bladeacer/mnemosync?style=for-the-badge&logo=go)
 ![GitHub License](https://img.shields.io/github/license/bladeacer/mnemosync?style=for-the-badge)
 
-# mnemosync
+# mmsync
 
-A CLI tool that lets you add folders to backup manually to a target Git repository.
+Short for mnemosync. A CLI tool that lets you add folders to backup manually to
+a target Git repository.
 
 The name is inspired by the Greek Goddess of memory Mnemosyne.
 
@@ -14,7 +15,7 @@ This installation guide assumes you know how to create and set up a Git reposito
 **Always backup your files before using mmsync**.
 
 ```bash
-go install github.com/bladeacer/mnemosync
+go install github.com/bladeacer/mmsync@latest
 ```
 
 Ensure that you can access Go binaries in your $PATH.

@@ -10,7 +10,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-	"mmsync/config" 
+	"github.com/bladeacer/mmsync/config" 
 	"github.com/spf13/cobra"
 )
 

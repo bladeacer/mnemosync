@@ -11,7 +11,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"mmsync/config"
+	"github.com/bladeacer/mmsync/config"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v3"
 	"github.com/peterh/liner"
