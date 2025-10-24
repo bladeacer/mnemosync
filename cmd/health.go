@@ -2,14 +2,11 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/spf13/cobra"
 	"os"
 	"os/exec"
 	"strings"
-	"github.com/spf13/cobra"
 )
-/*
-Copyright (C) 2025 bladeacer <wg.nick.exe@gmail.com>
-*/
 
 // healthCmd represents the health command
 var healthCmd = &cobra.Command{
@@ -28,17 +25,25 @@ func RunHealthCheck(shouldPrintOutput bool) string {
 	var errStrBuilder strings.Builder
 	separator := "_"
 	repeatedSeparator := strings.Repeat(separator, 72)
-	
+
 	configPath := appConf.ConfigSchema.ConfigPath
 	repoPath := appConf.ConfigSchema.RepoPath
 	dbPath := appConf.ConfigSchema.DbPath
-	
+
 	fmt.Println("\n\tRunning Health Check")
 
-	if err := checkBinWrapper("git", false); err != "" { errStrBuilder.WriteString(err) }
-	if err := checkBinWrapper("rsync", false); err != "" { errStrBuilder.WriteString(err) }
-	if err := checkBinWrapper("tar", false); err != "" { errStrBuilder.WriteString(err) }
-	if err := checkBinWrapper("zip", true); err != "" { errStrBuilder.WriteString(err) }
+	if err := checkBinWrapper("git", false); err != "" {
+		errStrBuilder.WriteString(err)
+	}
+	if err := checkBinWrapper("rsync", false); err != "" {
+		errStrBuilder.WriteString(err)
+	}
+	if err := checkBinWrapper("tar", false); err != "" {
+		errStrBuilder.WriteString(err)
+	}
+	if err := checkBinWrapper("zip", true); err != "" {
+		errStrBuilder.WriteString(err)
+	}
 
 	fmt.Printf("\t%s\n\n", repeatedSeparator)
 
@@ -51,7 +56,7 @@ func RunHealthCheck(shouldPrintOutput bool) string {
 		fmt.Printf("\t\t[FOUND] at %s\n", configPath)
 	}
 	fmt.Printf("\t%s\n", repeatedSeparator)
-	
+
 	fmt.Println("\tRepository Path:")
 	if repoPath == "" {
 		msg := "\t\t[NOT SET] Repository Path is not defined.\n\t\tRun 'mmsync init' to set.\n"
@@ -59,11 +64,11 @@ func RunHealthCheck(shouldPrintOutput bool) string {
 		fmt.Print(msg)
 	} else {
 		fmt.Printf("\t\t[SET] %s\n", repoPath)
-        
+
 		if _, err := os.Stat(repoPath); os.IsNotExist(err) {
-		     msg := fmt.Sprintf("\t\t[WARNING] Repository directory does not exist on disk: %s\n", repoPath)
-		     errStrBuilder.WriteString(msg) 
-		     fmt.Print(msg)
+			msg := fmt.Sprintf("\t\t[WARNING] Repository directory does not exist on disk: %s\n", repoPath)
+			errStrBuilder.WriteString(msg)
+			fmt.Print(msg)
 		}
 	}
 	fmt.Printf("\t%s\n", repeatedSeparator)
@@ -76,7 +81,7 @@ func RunHealthCheck(shouldPrintOutput bool) string {
 	} else {
 		fmt.Printf("\t\t[SET] %s\n", dbPath)
 	}
-    
+
 	if _, err := os.Stat(dbPath); os.IsNotExist(err) {
 		msg := fmt.Sprintf("\t\t[WARNING] Database file not found on disk: %s\n", dbPath)
 		errStrBuilder.WriteString(msg)
@@ -85,10 +90,9 @@ func RunHealthCheck(shouldPrintOutput bool) string {
 
 	fmt.Printf("\t%s\n", repeatedSeparator)
 	fmt.Println("\n\tHealth Check Complete")
-    
+
 	return errStrBuilder.String()
 }
-
 
 func checkBinWrapper(binaryName string, isOptional bool) string {
 	var msgBuilder strings.Builder
@@ -109,22 +113,21 @@ func checkBinWrapper(binaryName string, isOptional bool) string {
 
 	if versionErr != nil {
 		msgBuilder.WriteString(fmt.Sprintf("\t[WARNING] Version check failed for '%s'. ", binaryName))
-		
+
 		if exitError, ok := versionErr.(*exec.ExitError); ok {
 			msgBuilder.WriteString(fmt.Sprintf("Exit Code %d. Output:\n\t\t%s\n", exitError.ExitCode(), strings.TrimSpace(string(output))))
 		} else {
 			msgBuilder.WriteString(fmt.Sprintf("Failed to execute: %v\n", versionErr))
 		}
-		
+
 		return msgBuilder.String()
 	}
 
 	versionLine := strings.SplitN(string(output), "\n", 2)[0]
 	msgBuilder.WriteString(fmt.Sprintf("\tVersion: %s\n", strings.TrimSpace(versionLine)))
-    
+
 	return msgBuilder.String()
 }
-
 
 func init() {
 	rootCmd.AddCommand(healthCmd)

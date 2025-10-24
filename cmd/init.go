@@ -8,14 +8,10 @@ import (
 	"strings"
 
 	"github.com/bladeacer/mmsync/config"
+	"github.com/peterh/liner"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v3"
-	"github.com/peterh/liner"
 )
-
-/*
-Copyright (C) 2025 bladeacer <wg.nick.exe@gmail.com>
-*/
 
 // Global variable to hold the path passed via flag
 var repoPathFlag string
@@ -67,7 +63,7 @@ var initCmd = &cobra.Command{
 		defaultConfig.ConfigSchema.RepoPath = finalRepoPath
 
 		exists, _ := config.GitDirExists(finalRepoPath)
-		
+
 		if exists {
 			fmt.Printf("\nRepository path validated: '%s/.git' exists.\n", finalRepoPath)
 			writeYAML(defaultConfig, configPath)
@@ -124,13 +120,13 @@ func pathCompleter(line string) []string {
 		}
 
 		if strings.HasPrefix(name, prefix) {
-			
+
 			suggestion := filepath.Join(dir, name)
-			
+
 			if homePrefix && strings.HasPrefix(suggestion, homeDir) {
 				suggestion = "~" + suggestion[len(homeDir):]
 			}
-			
+
 			if entry.IsDir() {
 				if suggestion[len(suggestion)-1] != os.PathSeparator {
 					suggestion += string(os.PathSeparator)
@@ -182,7 +178,7 @@ func getRepoPathInteractive() (string, error) {
 	defer line.Close()
 
 	line.SetCompleter(pathCompleter)
-	line.SetTabCompletionStyle(liner.TabPrints) 
+	line.SetTabCompletionStyle(liner.TabPrints)
 	line.SetCtrlCAborts(true)
 
 	fmt.Println("Ensure that the target repository path is correct and does not contain other important files.\nDatabase for storing directories and their aliases would use the same parent directory.")
@@ -191,20 +187,20 @@ func getRepoPathInteractive() (string, error) {
 
 		fmt.Printf("\n\n")
 		inputPath, err := line.Prompt(prompt)
-		
+
 		if err != nil {
 			if err == liner.ErrPromptAborted {
 				fmt.Fprintln(os.Stderr, "\nInput cancelled by user (Ctrl+C).")
 				return "", fmt.Errorf("user cancelled input (Ctrl+C)")
-			} 
+			}
 			if err == io.EOF {
 				fmt.Fprintln(os.Stderr, "\nInput cancelled by user (Ctrl+D).")
 				return "", fmt.Errorf("user cancelled input (Ctrl+D)")
 			}
 		}
-		
+
 		inputPath = strings.TrimSpace(inputPath)
-		
+
 		if inputPath == "" {
 			continue
 		}
@@ -216,7 +212,7 @@ func getRepoPathInteractive() (string, error) {
 			fmt.Fprintf(os.Stderr, "Error: %v\n", err)
 			continue
 		}
-		
+
 		fmt.Printf("Path accepted: %s\n", finalRepoPath)
 		return finalRepoPath, nil
 	}

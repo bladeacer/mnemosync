@@ -2,15 +2,13 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/bladeacer/mmsync/config"
+	"github.com/spf13/cobra"
 	"os"
 	"path/filepath"
 	"strings"
-	"github.com/bladeacer/mmsync/config" 
-	"github.com/spf13/cobra"
 )
-/*
-Copyright (C) 2025 bladeacer wg.nick.exe@gmail.com
-*/
+
 // TODO: This command helps add directory paths to be staged before performing backup. Have CRUD in this.
 // Somehow rsync directories to the target directory and then tar archive all of them when push is called
 
@@ -40,11 +38,10 @@ Adds the current directory recursively to be staged.`,
 			fmt.Println("\nFinished adding entries.")
 		}
 
-
 	},
 }
 
-func addWrapper(args[] string) {
+func addWrapper(args []string) {
 	if len(aliases) > 0 && len(aliases) != len(args) {
 		fmt.Fprintf(os.Stderr, "Error: Number of paths (%d) must match number of aliases (%d).\n", len(args), len(aliases))
 		os.Exit(1)
@@ -112,25 +109,25 @@ func resolveAndValidatePath(path string) (string, error) {
 func addDirectoryEntry(targetPath string, alias string) error {
 	for newID, entry := range dataStore.TrackedDirs {
 		if entry.TargetPath == targetPath {
-		    return fmt.Errorf("path '%s' is already being tracked (ID: %s, Alias: %s)", 
-			targetPath, newID, entry.Alias)
+			return fmt.Errorf("path '%s' is already being tracked (ID: %s, Alias: %s)",
+				targetPath, newID, entry.Alias)
 		}
 
 		if entry.Alias == alias {
-		    return fmt.Errorf("alias '%s' is already in use by path '%s' (ID: %s)", 
-			alias, entry.TargetPath, newID)
+			return fmt.Errorf("alias '%s' is already in use by path '%s' (ID: %s)",
+				alias, entry.TargetPath, newID)
 		}
 	}
-    
+
 	dbPath := config.ResolveDbPath()
 
-	newEntry := config.DirData {
+	newEntry := config.DirData{
 		TargetPath: targetPath,
 		Alias:      alias,
 	}
 
 	newID := dataStore.AddDir(newEntry)
-	
+
 	if err := dataStore.SaveData(dbPath); err != nil {
 		return fmt.Errorf("failed to save data store after adding entry: %w", err)
 	}
@@ -139,10 +136,9 @@ func addDirectoryEntry(targetPath string, alias string) error {
 	fmt.Printf("\tID: %s\n", newID)
 	fmt.Printf("\tPath: %s\n", targetPath)
 	fmt.Printf("\tAlias: %s\n", alias)
-	
+
 	return nil
 }
-
 
 func init() {
 	rootCmd.AddCommand(addCmd)

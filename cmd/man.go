@@ -1,22 +1,18 @@
 package cmd
 
 import (
-	"fmt"
-	"os"
-	"os/exec"
 	"bytes"
+	"fmt"
 	mcobra "github.com/muesli/mango-cobra"
 	"github.com/muesli/roff"
 	"github.com/spf13/cobra"
+	"os"
+	"os/exec"
 )
-/*
-Copyright (C) 2025 bladeacer <wg.nick.exe@gmail.com>
-*/
-
 
 // manCmd represents the man command
 var manCmd = &cobra.Command{
-	Use: "man",
+	Use:   "man",
 	Short: "Generates the manual page for mnemosync",
 	Long: `Generates and displays manual page for mnemosync
 
@@ -36,7 +32,7 @@ func displayManPage() {
 		panic(err)
 	}
 
-	manPage = manPage.WithSection("Copyright", "(C) 2025 bladeacer.\n" +
+	manPage = manPage.WithSection("Copyright", "(C) 2025 bladeacer.\n"+
 		"Released under GPLv3 license.")
 
 	// Get the generated man page content.
@@ -57,9 +53,9 @@ func displayManPage() {
 	// `man -l` command formats and displays a local man page file.
 	// We pipe the content to `man`'s standard input.
 	manCmd := exec.Command("man", "-l", "-")
-	
+
 	// Set the command's standard input to our buffer.
-	manCmd.Stdin = &buf 
+	manCmd.Stdin = &buf
 	manCmd.Stdout = os.Stdout
 	manCmd.Stderr = os.Stderr
 

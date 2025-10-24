@@ -7,27 +7,25 @@ import (
 	"path/filepath"
 	"strconv"
 )
-/*
-Copyright (C) 2025 bladeacer <wg.nick.exe@gmail.com>
-*/
 
 type DirData struct {
 	TargetPath string `json:"target_path"`
-	Alias string `json:"alias"`
+	Alias      string `json:"alias"`
 }
 type DataStore struct {
-	CurrentId int64 `json:"current_id"`
+	CurrentId   int64              `json:"current_id"`
 	TrackedDirs map[string]DirData `json:"tracked_dirs"`
 }
+
 func GetDataStore() *DataStore {
 	return &DataStore{
-		CurrentId: 0,
+		CurrentId:   0,
 		TrackedDirs: make(map[string]DirData),
 	}
 }
 func LoadDataStore() (*DataStore, error) {
 	dbPath := ResolveDbPath()
-	
+
 	defaultDS := GetDataStore()
 
 	data, err := os.ReadFile(dbPath)
@@ -46,25 +44,25 @@ func LoadDataStore() (*DataStore, error) {
 
 	if err := validateDataStoreSchema(tempDS); err != nil {
 		fmt.Fprintf(os.Stderr, "Warning: Database at %s failed schema validation: %v. Overwriting with default data.\n", dbPath, err)
-		
+
 		tempDS = defaultDS
-		
+
 		if saveErr := tempDS.SaveData(dbPath); saveErr != nil {
-		    return nil, fmt.Errorf("critical error: failed to repair and save default data store: %w", saveErr)
+			return nil, fmt.Errorf("critical error: failed to repair and save default data store: %w", saveErr)
 		}
-		
+
 		return tempDS, nil
 	}
-	
+
 	return tempDS, nil
 }
 
 func (ds *DataStore) AddDir(data DirData) string {
-    ds.CurrentId += 1
-    
-    newIDStr := strconv.FormatInt(ds.CurrentId, 10)
-    ds.TrackedDirs[newIDStr] = data
-    return newIDStr
+	ds.CurrentId += 1
+
+	newIDStr := strconv.FormatInt(ds.CurrentId, 10)
+	ds.TrackedDirs[newIDStr] = data
+	return newIDStr
 }
 func (ds *DataStore) SaveData(targetPath string) error {
 	jsonData, err := json.MarshalIndent(ds, "", "  ")
@@ -85,7 +83,7 @@ func (ds *DataStore) SaveData(targetPath string) error {
 func validateDataStoreSchema(ds *DataStore) error {
 	if ds.CurrentId < 0 {
 		return fmt.Errorf("current_id cannot be negative; found: %d", ds.CurrentId)
-	} 
+	}
 	if ds.TrackedDirs == nil {
 		return fmt.Errorf("required field 'tracked_dirs' is missing from the database schema")
 	}
@@ -114,4 +112,3 @@ func validateDataStoreSchema(ds *DataStore) error {
 
 	return nil
 }
-

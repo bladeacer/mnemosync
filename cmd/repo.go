@@ -2,14 +2,11 @@ package cmd
 
 import (
 	"fmt"
-	"os"
-	"os/exec"
 	"github.com/bladeacer/mmsync/config"
 	"github.com/spf13/cobra"
+	"os"
+	"os/exec"
 )
-/*
-Copyright (C) 2025 bladeacer wg.nick.exe@gmail.com
-*/
 
 var repoCmd = &cobra.Command{
 	Use:   "repo",
@@ -51,7 +48,7 @@ var repoOpenCmd = &cobra.Command{
 			fmt.Println("Error: $EDITOR environment variable not set. Please set it to your preferred text editor (e.g., 'vim', 'code').")
 			os.Exit(1)
 		}
-		
+
 		if !isInit {
 			fmt.Printf("\nConfiguration file not found at expected path\n%s\nRun mmsync init to start.\n", configPath)
 			os.Exit(1)
@@ -70,10 +67,9 @@ var repoOpenCmd = &cobra.Command{
 	},
 }
 
-
 func init() {
 	rootCmd.AddCommand(repoCmd)
-	
+
 	repoCmd.AddCommand(repoGetCmd)
 	repoCmd.AddCommand(repoOpenCmd)
 }

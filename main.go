@@ -1,14 +1,11 @@
 package main
 
 import (
+	"fmt"
 	"github.com/bladeacer/mmsync/cmd"
 	"github.com/bladeacer/mmsync/config"
-	"fmt"
 	"os"
 )
-/*
-Copyright (C) 2025 bladeacer <wg.nick.exe@gmail.com>
-*/
 
 func main() {
 	euid := os.Geteuid()
@@ -21,14 +18,14 @@ func main() {
 
 	appConfig, err := config.LoadConfig()
 	dataStore, err2 := config.LoadDataStore()
-	
+
 	if err != nil {
 		fmt.Printf("Error loading configuration: %v\n", err)
 		os.Exit(1)
 	}
-    
+
 	if err2 != nil {
-		fmt.Printf("Error loading database: %v\n", err2) 
+		fmt.Printf("Error loading database: %v\n", err2)
 		os.Exit(1)
 	}
 

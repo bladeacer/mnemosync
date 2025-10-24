@@ -1,17 +1,14 @@
 package cmd
 
 import (
-	"github.com/bladeacer/mmsync/config"
-	"os"
-	"github.com/spf13/cobra"
 	"fmt"
+	"github.com/bladeacer/mmsync/config"
+	"github.com/spf13/cobra"
+	"os"
 )
-/*
-Copyright (C) 2025 bladeacer <wg.nick.exe@gmail.com>
-*/
 
 var dataStore *config.DataStore
-var appConf *config.MnemoConf 
+var appConf *config.MnemoConf
 var versionFlag bool
 
 // rootCmd represents the base command when called without any subcommands
@@ -25,7 +22,7 @@ The name is inspired by the Greek Goddess of memory Mnemosyne.
 This application assumes that you know how to create and set up a Git repository.`,
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
-	Run: func(cmd *cobra.Command, args []string) { 
+	Run: func(cmd *cobra.Command, args []string) {
 		if versionFlag {
 			schema_ver := appConf.ConfigSchema.AppVersion
 			fmt.Printf("mnemosync %s\n", schema_ver)
@@ -60,5 +57,3 @@ func init() {
 	// rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 	rootCmd.Flags().BoolVarP(&versionFlag, "version", "v", false, "Gets the version of mnemosync running")
 }
-
-
